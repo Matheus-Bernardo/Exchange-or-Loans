@@ -8,8 +8,8 @@ namespace ExchangeOrLoans.data
             : base(options)
         {
         }
-        // Tables
-        public DbSet<User> Users { get; set; }
+        // Tables of dataBase
+        public DbSet<User> User { get; set; }
         
     }
 }
