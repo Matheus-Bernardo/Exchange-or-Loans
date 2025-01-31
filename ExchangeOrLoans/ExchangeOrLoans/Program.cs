@@ -1,7 +1,7 @@
-using Microsoft.EntityFrameworkCore;
 using ExchangeOrLoans.data;
 using ExchangeOrLoans.Repositories;
 using ExchangeOrLoans.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
