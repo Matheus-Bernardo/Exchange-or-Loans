@@ -1,4 +1,5 @@
 ﻿using BCrypt.Net;
+using ExchangeOrLoans.DTOS;
 using ExchangeOrLoans.models;
 using ExchangeOrLoans.Repositories;
 using Microsoft.AspNetCore.Mvc;
@@ -43,7 +44,17 @@ public class UserService : IUserService
 
         return new OkObjectResult(user);
     }
-    
-     
-    
+
+    public async Task<ActionResult<string>> Login(LoginDto loginDto)
+    {
+        var user = await _userRepository.GetUserByEmail(loginDto.Email);
+        
+        if (user == null) return new BadRequestObjectResult("Email not found");
+        
+        bool passwordMatches = BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password);
+        if (!passwordMatches) return new BadRequestObjectResult("Password Incorrect");
+        
+        return new OkObjectResult(new {message = "Login successful", nome= user.Username});
+        
+    }
 }
