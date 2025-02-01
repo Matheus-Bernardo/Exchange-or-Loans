@@ -34,6 +34,14 @@ public class UserRepository: IUserRepository
     {
         return await _dbContext.User.AnyAsync(u => u.Email == email);
     }
-    
-    
+
+    public async Task<bool> PasswordAndEmailSearch(string email,string password)
+    {
+        return await _dbContext.User.AnyAsync(u => u.Email == email && u.Password == password);
+    }
+
+    public async Task<User?> GetUserByEmail(string email)
+    {
+            return await _dbContext.User.FirstOrDefaultAsync(u => u.Email == email);
+    }
 }

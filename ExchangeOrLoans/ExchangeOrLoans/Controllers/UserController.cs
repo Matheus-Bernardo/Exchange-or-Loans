@@ -1,4 +1,5 @@
-﻿using ExchangeOrLoans.models;
+﻿using ExchangeOrLoans.DTOS;
+using ExchangeOrLoans.models;
 using ExchangeOrLoans.Repositories;
 using ExchangeOrLoans.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -28,5 +29,11 @@ public class UserController : ControllerBase
     {
         return  await _userService.GetUserById(id);
         
+    }
+
+    [HttpPost("login")]
+    public async Task<ActionResult<string>> Login([FromBody]LoginDto loginDto)
+    {
+        return await _userService.Login(loginDto);
     }
 }

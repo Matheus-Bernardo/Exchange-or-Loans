@@ -4,6 +4,7 @@
         <TargetFramework>net9.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo> <!-- Desativa a geração automática -->
     </PropertyGroup>
 
     <ItemGroup>
@@ -19,6 +20,12 @@
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.3" />
         <PackageReference Include="xunit" Version="2.9.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="ExchangeOrLoans.Tests\obj\Debug\net9.0\ExchangeOrLoans.Tests.sourcelink.json" />
+      <_ContentIncludedByDefault Remove="ExchangeOrLoans.Tests\obj\ExchangeOrLoans.Tests.csproj.nuget.dgspec.json" />
+      <_ContentIncludedByDefault Remove="ExchangeOrLoans.Tests\obj\project.assets.json" />
     </ItemGroup>
 
 </Project>

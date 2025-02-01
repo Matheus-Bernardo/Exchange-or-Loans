@@ -8,5 +8,7 @@ public interface IUserRepository
     Task<User?> GetUserById(int id);
     Task<bool> UsernameExists(string username);
     Task<bool> EmailExists(string email);
-    
+    Task<bool> PasswordAndEmailSearch(string email, string password);
+    Task<User> GetUserByEmail(string email);
+
 }
