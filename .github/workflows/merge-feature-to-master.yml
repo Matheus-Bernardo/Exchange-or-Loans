@@ -1,0 +1,31 @@
+name: Merge Feature to Master
+
+on:
+  pull_request:
+    types:
+      - closed  # Aciona quando um PR é fechado
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Verifica se o PR foi mesclado
+        if: github.event.pull_request.merged == true
+        run: echo "Pull Request foi mesclado!"
+
+      - name: Configurar usuário do Git
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+      - name: Merge automático para master
+        run: |
+          git checkout master
+          git merge --no-ff ${{ github.event.pull_request.head.ref }} -m "Merge automático pelo GitHub Actions"
+          git push origin master
