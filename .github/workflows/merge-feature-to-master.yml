@@ -1,31 +1,37 @@
-name: Merge Feature to Master
+name: Merge automático de features para projetps
 
 on:
   pull_request:
+    branches:
+      - projetps  # Roda apenas se o PR for para a branch projetps
     types:
-      - closed  # Aciona quando um PR é fechado
+      - closed    # Apenas quando o PR for fechado
 
 jobs:
-  merge:
+  auto-merge:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout do código
+      - name: Checkout do repositório
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # Garante que todas as branches são baixadas
 
       - name: Verifica se o PR foi mesclado
         if: github.event.pull_request.merged == true
-        run: echo "Pull Request foi mesclado!"
+        run: echo "PR foi mesclado, iniciando merge automático"
 
       - name: Configurar usuário do Git
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
 
-      - name: Merge automático para master
+      - name: Checkout da branch projetps
         run: |
-          git checkout master
-          git merge --no-ff ${{ github.event.pull_request.head.ref }} -m "Merge automático pelo GitHub Actions"
-          git push origin master
+          git checkout projetps
+          git pull origin projetps  # Garante que está atualizado
+
+      - name: Merge da feature para projetps
+        run: |
+          git merge --no-ff origin/${{ github.event.pull_request.head.ref }} -m "Merge automático via GitHub Actions"
+          git push origin projetps
