@@ -1,4 +1,5 @@
-﻿using ExchangeOrLoans.models;
+﻿using BCrypt.Net;
+using ExchangeOrLoans.models;
 using ExchangeOrLoans.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,6 +25,9 @@ public class UserService : IUserService
         {
             return new BadRequestObjectResult("Email already exists");
         }
+        
+        string passwordHash = BCrypt.Net.BCrypt.HashPassword(user.Password);
+        user.Password = passwordHash;
         
         var createdUser = await _userRepository.CreateUser(user);
         return new CreatedAtActionResult(nameof(CreateUser), "User", new { id = createdUser.Id }, createdUser);
