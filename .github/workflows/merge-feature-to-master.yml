@@ -26,12 +26,12 @@ jobs:
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
 
-      - name: Checkout da branch projetps
+      - name: Checkout da branch Projetps
         run: |
-          git checkout projetps
-          git pull origin projetps  # Garante que está atualizado
+          git checkout Projetps
+          git pull origin Projetps  # Garante que está atualizado
 
-      - name: Merge da feature para projetps
+      - name: Merge da feature para Projetps
         run: |
           git merge --no-ff origin/${{ github.event.pull_request.head.ref }} -m "Merge automático via GitHub Actions"
-          git push origin projetps
+          git push origin Projetps
