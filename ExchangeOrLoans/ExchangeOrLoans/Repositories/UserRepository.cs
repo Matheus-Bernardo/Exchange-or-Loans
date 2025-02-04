@@ -1,4 +1,5 @@
 ﻿using ExchangeOrLoans.data;
+using ExchangeOrLoans.DTOS;
 using ExchangeOrLoans.models;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,9 +21,32 @@ public class UserRepository: IUserRepository
         await _dbContext.SaveChangesAsync();
         return user;
     }
-    public async Task<User?> GetUserById(int id)
+
+    public async Task<List<UserDto>> GetAllUsers()
     {
-        return await _dbContext.User.FindAsync(id);
+        return await _dbContext.User.Select(user => new UserDto {Id= user.Id, Username = user.Username, FirstName = user.FirstName }).ToListAsync();
+    }
+    public async Task<UserDto?> GetUserById(int id)
+    {
+        var user = await _dbContext.User.Where(user => user.Id == id).Select(user => new UserDto
+        {
+            Id = user.Id,
+            Username = user.Username,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email,
+            Score = user.Score,
+            CreatedAt = user.CreatedAt,
+
+        }).FirstOrDefaultAsync();
+
+        if (user == null)
+        {
+            return null;
+        }
+
+        return user;
+      
     }
 
     public async Task<bool> UsernameExists(string username)

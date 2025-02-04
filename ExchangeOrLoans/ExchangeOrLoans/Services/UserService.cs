@@ -45,6 +45,16 @@ public class UserService : IUserService
         return new OkObjectResult(user);
     }
 
+    public async Task<ActionResult<List<UserDto>>> GetUsers()
+    {
+        var users =  await _userRepository.GetAllUsers();
+        if (users == null || !users.Any())
+        {
+            return new NotFoundObjectResult("Users not found");
+        }
+        
+        return new OkObjectResult(users);
+    }
     public async Task<ActionResult<string>> Login(LoginDto loginDto)
     {
         var user = await _userRepository.GetUserByEmail(loginDto.Email);

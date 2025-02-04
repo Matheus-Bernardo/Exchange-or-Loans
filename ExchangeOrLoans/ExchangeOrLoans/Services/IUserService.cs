@@ -7,6 +7,8 @@ namespace ExchangeOrLoans.Services;
 public interface IUserService
 {
     Task<ActionResult<User>> CreateUser(User user);
+    Task<ActionResult<List<UserDto>>> GetUsers();
     Task<ActionResult<User>> GetUserById(int id);
     Task<ActionResult<string>> Login(LoginDto loginDto);
+    
 }
