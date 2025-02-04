@@ -3,7 +3,7 @@ name: Merge automático de features para projetps
 on:
   pull_request:
     branches:
-      - projetps  # Roda apenas se o PR for para a branch projetps
+      - Projetps  # Roda apenas se o PR for para a branch projetps
     types:
       - closed    # Apenas quando o PR for fechado
 
