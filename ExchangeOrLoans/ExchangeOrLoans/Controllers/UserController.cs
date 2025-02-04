@@ -31,6 +31,12 @@ public class UserController : ControllerBase
         
     }
 
+    [HttpGet]
+    public async Task<ActionResult<List<UserDto>>> GetUsers()
+    {
+        return await _userService.GetUsers();
+    }
+
     [HttpPost("login")]
     public async Task<ActionResult<string>> Login([FromBody]LoginDto loginDto)
     {

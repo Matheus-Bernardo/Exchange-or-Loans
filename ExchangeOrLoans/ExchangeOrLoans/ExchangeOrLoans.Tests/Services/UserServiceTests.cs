@@ -25,6 +25,8 @@ public class UserServiceTests
         {
             Username = "exampleUser",
             Email = "example@example.com",
+            FirstName = "Example",
+            LastName = "Example2",
             Password = "securePassword",
             Score = 1
         };
