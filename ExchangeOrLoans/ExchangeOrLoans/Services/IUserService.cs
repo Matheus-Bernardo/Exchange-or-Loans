@@ -11,4 +11,7 @@ public interface IUserService
     Task<ActionResult<User>> GetUserById(int id);
     Task<ActionResult<string>> Login(LoginDto loginDto);
     
+    Task <bool> DeleteUser(int id);
+    
+    
 }

@@ -67,4 +67,12 @@ public class UserService : IUserService
         return new OkObjectResult(new {message = "Login successful", nome= user.Username});
         
     }
+
+    public async  Task<bool> DeleteUser(int id)
+    {
+        var userDto = await _userRepository.GetUserById(id);
+        if (userDto == null) return false;
+
+        return await _userRepository.DeleteUser(id);
+    }
 }

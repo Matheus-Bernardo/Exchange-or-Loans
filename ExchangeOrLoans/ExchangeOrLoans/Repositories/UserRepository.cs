@@ -59,13 +59,20 @@ public class UserRepository: IUserRepository
         return await _dbContext.User.AnyAsync(u => u.Email == email);
     }
 
-    public async Task<bool> PasswordAndEmailSearch(string email,string password)
+    public async Task<bool> DeleteUser(int id)
     {
-        return await _dbContext.User.AnyAsync(u => u.Email == email && u.Password == password);
+        var user = await _dbContext.User.FindAsync(id);
+        if(user == null) return false;
+        
+        _dbContext.User.Remove(user);
+        await _dbContext.SaveChangesAsync();
+        return true;
     }
 
     public async Task<User?> GetUserByEmail(string email)
     {
             return await _dbContext.User.FirstOrDefaultAsync(u => u.Email == email);
     }
+
+   
 }

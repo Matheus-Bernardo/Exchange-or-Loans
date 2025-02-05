@@ -42,4 +42,10 @@ public class UserController : ControllerBase
     {
         return await _userService.Login(loginDto);
     }
+
+    [HttpDelete("{id}")]
+    public async Task<bool> DeleteUser(int id)
+    {
+        return await _userService.DeleteUser(id);
+    }
 }
