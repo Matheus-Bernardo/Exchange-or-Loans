@@ -2,7 +2,10 @@
 using ExchangeOrLoans.models;
 using ExchangeOrLoans.Repositories;
 using ExchangeOrLoans.Services;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Query.Internal;
+
 namespace ExchangeOrLoans.Controllers;
 
 [ApiController]
@@ -10,7 +13,6 @@ namespace ExchangeOrLoans.Controllers;
 public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
-
     public UserController(IUserService userService)
     {
         _userService = userService;
@@ -47,5 +49,14 @@ public class UserController : ControllerBase
     public async Task<bool> DeleteUser(int id)
     {
         return await _userService.DeleteUser(id);
+    }
+    
+    [HttpPatch("{id}")]
+    public async Task<ActionResult<User>> UpdateUser( UserDto user, int id)
+    {
+        var updatedUser = await _userService.UpdateUser(user, id);
+        if (updatedUser == null) return NotFound("User not found");
+        
+        return updatedUser;
     }
 }

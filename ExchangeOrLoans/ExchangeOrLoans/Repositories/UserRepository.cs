@@ -1,6 +1,7 @@
 ﻿using ExchangeOrLoans.data;
 using ExchangeOrLoans.DTOS;
 using ExchangeOrLoans.models;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExchangeOrLoans.Repositories;
@@ -14,51 +15,42 @@ public class UserRepository: IUserRepository
     {
         this._dbContext = dbContext;
     }
-    
     public async Task<User> CreateUser(User user)
     {
         _dbContext.User.Add(user);
         await _dbContext.SaveChangesAsync();
         return user;
     }
-
     public async Task<List<UserDto>> GetAllUsers()
     {
-        return await _dbContext.User.Select(user => new UserDto {Id= user.Id, Username = user.Username, FirstName = user.FirstName }).ToListAsync();
+        return await _dbContext.User.Select(user => new UserDto 
+            {Id= user.Id, 
+             Username = user.Username,
+             FirstName = user.FirstName,
+             LastName = user.LastName,
+             Email = user.Email,
+             Score = user.Score,
+             CreatedAt = user.CreatedAt,
+            }).ToListAsync();
     }
-    public async Task<UserDto?> GetUserById(int id)
+    public async Task<User?> GetUserById(int id)
     {
-        var user = await _dbContext.User.Where(user => user.Id == id).Select(user => new UserDto
-        {
-            Id = user.Id,
-            Username = user.Username,
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            Email = user.Email,
-            Score = user.Score,
-            CreatedAt = user.CreatedAt,
-
-        }).FirstOrDefaultAsync();
+        var user = await _dbContext.User.Where(user => user.Id == id).FirstOrDefaultAsync();
 
         if (user == null)
         {
             return null;
         }
-
         return user;
-      
     }
-
     public async Task<bool> UsernameExists(string username)
     {
         return await _dbContext.User.AnyAsync(u => u.Username == username);
     }
-
     public async Task<bool> EmailExists(string email)
     {
         return await _dbContext.User.AnyAsync(u => u.Email == email);
     }
-
     public async Task<bool> DeleteUser(int id)
     {
         var user = await _dbContext.User.FindAsync(id);
@@ -68,11 +60,14 @@ public class UserRepository: IUserRepository
         await _dbContext.SaveChangesAsync();
         return true;
     }
-
     public async Task<User?> GetUserByEmail(string email)
     {
             return await _dbContext.User.FirstOrDefaultAsync(u => u.Email == email);
     }
-
-   
+    public async Task<User> UpdateUser(User user)
+    {
+        _dbContext.User.Update(user);
+        await _dbContext.SaveChangesAsync();
+        return user;
+    }
 }
