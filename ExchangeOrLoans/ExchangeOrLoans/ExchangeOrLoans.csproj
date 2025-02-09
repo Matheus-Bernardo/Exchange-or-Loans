@@ -27,6 +27,15 @@
       <_ContentIncludedByDefault Remove="ExchangeOrLoans.Tests\obj\Debug\net9.0\ExchangeOrLoans.Tests.sourcelink.json" />
       <_ContentIncludedByDefault Remove="ExchangeOrLoans.Tests\obj\ExchangeOrLoans.Tests.csproj.nuget.dgspec.json" />
       <_ContentIncludedByDefault Remove="ExchangeOrLoans.Tests\obj\project.assets.json" />
+      <_ContentIncludedByDefault Remove="ExchangeOrLoans.Tests\bin\Debug\net9.0\appsettings.Development.json" />
+      <_ContentIncludedByDefault Remove="ExchangeOrLoans.Tests\bin\Debug\net9.0\appsettings.json" />
+      <_ContentIncludedByDefault Remove="ExchangeOrLoans.Tests\bin\Debug\net9.0\ExchangeOrLoans.deps.json" />
+      <_ContentIncludedByDefault Remove="ExchangeOrLoans.Tests\bin\Debug\net9.0\ExchangeOrLoans.runtimeconfig.json" />
+      <_ContentIncludedByDefault Remove="ExchangeOrLoans.Tests\bin\Debug\net9.0\ExchangeOrLoans.staticwebassets.endpoints.json" />
+      <_ContentIncludedByDefault Remove="ExchangeOrLoans.Tests\bin\Debug\net9.0\ExchangeOrLoans.Tests.deps.json" />
+      <_ContentIncludedByDefault Remove="ExchangeOrLoans.Tests\bin\Debug\net9.0\ExchangeOrLoans.Tests.runtimeconfig.json" />
+      <_ContentIncludedByDefault Remove="ExchangeOrLoans.Tests\bin\Debug\net9.0\ExchangeOrLoans.Tests\obj\ExchangeOrLoans.Tests.csproj.nuget.dgspec.json" />
+      <_ContentIncludedByDefault Remove="ExchangeOrLoans.Tests\bin\Debug\net9.0\ExchangeOrLoans.Tests\obj\project.assets.json" />
     </ItemGroup>
 
 </Project>

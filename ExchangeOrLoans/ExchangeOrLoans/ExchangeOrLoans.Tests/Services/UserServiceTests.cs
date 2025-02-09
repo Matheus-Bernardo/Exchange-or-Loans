@@ -1,4 +1,5 @@
-﻿using ExchangeOrLoans.models;
+﻿using ExchangeOrLoans.DTOS;
+using ExchangeOrLoans.models;
 using ExchangeOrLoans.Repositories;
 using ExchangeOrLoans.Services;
 namespace ExchangeOrLoans.ExchangeOrLoans.Tests.Services;
@@ -45,4 +46,109 @@ public class UserServiceTests
         Assert.Equal(user.Id, ((User)createdAtAction.Value).Id);
         
     }
+    
+    [Fact]
+    public async Task UpdateUser_ValidUser_ShouldReturnUpdatedUser()
+    {
+        var user = new User
+        {
+            Id = 1,
+            Username = "exampleUser",
+            Email = "example@example.com",
+            FirstName = "Example",
+            LastName = "Example2",
+            Password = "securePassword",
+            Score = 1,
+            
+        };
+        
+        var updateUserDto = new UserDto
+        {
+            Id = 1,
+            Username = "updateUser",
+            Email = "update@example.com",
+            FirstName = "ExampleUpdate",
+            LastName = "Example2Update",
+            Password = "securePasswordUpdate",
+            Score = 5,
+            
+        };
+        
+        var updatedUser = new User
+        {
+            Id = user.Id,
+            Username = updateUserDto.Username,
+            Email = updateUserDto.Email,
+            FirstName = updateUserDto.FirstName,
+            LastName = updateUserDto.LastName,
+            Password = BCrypt.Net.BCrypt.HashPassword(updateUserDto.Password),
+            Score = updateUserDto.Score ?? user.Score, // Trata valores nulos
+        };
+        
+        //Simulates the user ID search in the bank
+        _userRepositoryMock.Setup(repo => repo.GetUserById(user.Id)).ReturnsAsync(user);
+        _userRepositoryMock.Setup(repo => repo.UpdateUser(It.IsAny<User>())).ReturnsAsync(updatedUser);
+        
+        var result = await _userService.UpdateUser(updateUserDto,user.Id);
+        
+        Assert.IsType<OkObjectResult>(result.Result);
+        var okResult = result.Result as OkObjectResult;
+        Assert.Equal(200, okResult.StatusCode);
+
+        var returnedUser = okResult.Value as string;
+        Assert.NotNull(returnedUser);
+        Assert.Equal("User updated Successfully", returnedUser);
+        
+    }
+
+    [Fact]
+    public async Task DeleteUser_ValidUser_ShouldReturnTrue()
+    {
+        var user = new User
+        {
+            Id = 1,
+            Username = "exampleUser",
+            Email = "example@example.com",
+            FirstName = "Example",
+            LastName = "Example2",
+            Password = "securePassword",
+            Score = 1
+        };
+        _userRepositoryMock.Setup(repo => repo.GetUserById(user.Id)).ReturnsAsync(user);
+        _userRepositoryMock.Setup(repo => repo.DeleteUser(user.Id)).ReturnsAsync(true);
+        
+        var result = await _userService.DeleteUser(user.Id);
+        
+        Assert.True(result);
+    }
+    
+    [Fact]
+    public async Task GetUsers_WhenUsersExist_ShouldReturnOkWithUsers()
+    {
+        var users = new List<UserDto>
+        {
+            new UserDto { Id = 1, FirstName = "John Doe", Email = "john@example.com" },
+            new UserDto { Id = 2, FirstName = "Jane Doe", Email = "jane@example.com" }
+        };
+
+        _userRepositoryMock.Setup(repo => repo.GetAllUsers()).ReturnsAsync(users);
+
+        var result = await _userService.GetUsers();
+        
+        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var returnedUsers = Assert.IsType<List<UserDto>>(okResult.Value);
+        Assert.Equal(2, returnedUsers.Count);
+    }
+    
+    [Fact]
+    public async Task GetUsers_WhenNoUsersExist_ShouldReturnNotFound()
+    {
+        _userRepositoryMock.Setup(repo => repo.GetAllUsers()).ReturnsAsync(new List<UserDto>());
+        
+        var result = await _userService.GetUsers();
+        
+        var notFoundResult = Assert.IsType<NotFoundObjectResult>(result.Result);
+        Assert.Equal("Users not found", notFoundResult.Value);
+    }
+
 }
