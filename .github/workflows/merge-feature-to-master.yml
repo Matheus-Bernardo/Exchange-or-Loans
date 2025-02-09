@@ -1,11 +1,11 @@
-name: Merge automático de features para projetps
+name: Merge automático de features para Projetps
 
 on:
   pull_request:
     branches:
-      - Projetps  # Roda apenas se o PR for para a branch projetps
+      - Projetps  # Aciona para PRs com destino à branch Projetps
     types:
-      - closed    # Apenas quando o PR for fechado
+      - closed   # Aciona quando o PR for fechado
 
 jobs:
   auto-merge:
@@ -18,9 +18,10 @@ jobs:
           fetch-depth: 0  # Garante que todas as branches são baixadas
 
       - name: Verifica se o PR foi mesclado
-        if: github.event.pull_request.merged == true
-        run: echo "PR foi mesclado, iniciando merge automático"
-
+        if: github.event.pull_request.merged == false
+        run: |
+          echo "PR fechado sem merge, iniciando merge automático."
+      
       - name: Configurar usuário do Git
         run: |
           git config --global user.name "github-actions"
