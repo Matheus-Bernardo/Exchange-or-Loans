@@ -3,9 +3,9 @@ name: Merge automático de features para Projetps
 on:
   pull_request:
     branches:
-      - Projetps  # Aciona para PRs com destino à branch Projetps
+      - Projetps
     types:
-      - closed   # Aciona quando o PR for fechado
+      - closed
 
 jobs:
   auto-merge:
@@ -21,7 +21,7 @@ jobs:
         if: github.event.pull_request.merged == false
         run: |
           echo "PR fechado sem merge, iniciando merge automático."
-      
+
       - name: Configurar usuário do Git
         run: |
           git config --global user.name "github-actions"
@@ -35,4 +35,4 @@ jobs:
       - name: Merge da feature para Projetps
         run: |
           git merge --no-ff origin/${{ github.event.pull_request.head.ref }} -m "Merge automático via GitHub Actions"
-          git push origin Projetps
+          git push https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/Matheus-Bernardo/Exchange-or-Loans.git Projetps
