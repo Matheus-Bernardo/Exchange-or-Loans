@@ -9,12 +9,10 @@ namespace ExchangeOrLoans.Services;
 public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
-
     public UserService(IUserRepository userRepository)
     {
         _userRepository = userRepository;
     }
-
     public async Task<ActionResult<User>> CreateUser(User user)
     {
         if (await _userRepository.UsernameExists(user.Username))
@@ -44,7 +42,6 @@ public class UserService : IUserService
 
         return new OkObjectResult(user);
     }
-
     public async Task<ActionResult<List<UserDto>>> GetUsers()
     {
         var users =  await _userRepository.GetAllUsers();
@@ -64,7 +61,32 @@ public class UserService : IUserService
         bool passwordMatches = BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password);
         if (!passwordMatches) return new BadRequestObjectResult("Password Incorrect");
         
-        return new OkObjectResult(new {message = "Login successful", nome= user.Username});
+        return new OkObjectResult(new {message = "Login successful", nome= user.FirstName});
         
+    }
+    public async Task<ActionResult<User>> UpdateUser(UserDto user, int id)
+    {
+        var userFind = await _userRepository.GetUserById(id);
+        if (userFind == null) return new NotFoundObjectResult("User not found");
+        
+        userFind.Username = user.Username ?? userFind.Username;
+        userFind.Email = user.Email ?? userFind.Email;
+        userFind.FirstName = user.FirstName ?? userFind.FirstName;
+        userFind.LastName = user.LastName ?? userFind.LastName;
+        userFind.Score = user.Score ?? userFind.Score;
+        
+        if (!string.IsNullOrEmpty(user.Password))
+        {
+            userFind.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
+        }
+        
+        return new OkObjectResult($"User updated Successfully");
+    }
+    public async  Task<bool> DeleteUser(int id)
+    {
+        var userDto = await _userRepository.GetUserById(id);
+        if (userDto == null) return false;
+
+        return await _userRepository.DeleteUser(id);
     }
 }
