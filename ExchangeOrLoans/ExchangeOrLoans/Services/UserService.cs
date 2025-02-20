@@ -25,6 +25,11 @@ public class UserService : IUserService
             return new BadRequestObjectResult("Email already exists");
         }
         
+        if (string.IsNullOrEmpty(user.Password))
+        {
+            return new BadRequestObjectResult("Password is required");
+        }
+        
         string passwordHash = BCrypt.Net.BCrypt.HashPassword(user.Password);
         user.Password = passwordHash;
         
