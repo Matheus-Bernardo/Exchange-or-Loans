@@ -1,8 +1,9 @@
-﻿using BCrypt.Net;
+﻿
 using ExchangeOrLoans.DTOS;
 using ExchangeOrLoans.models;
 using ExchangeOrLoans.Repositories;
 using Microsoft.AspNetCore.Mvc;
+
 
 namespace ExchangeOrLoans.Services;
 
@@ -65,8 +66,10 @@ public class UserService : IUserService
         
         bool passwordMatches = BCrypt.Net.BCrypt.Verify(loginDto.Password, user.Password);
         if (!passwordMatches) return new BadRequestObjectResult("Password Incorrect");
+
+        var Token = TokenService.GenerateToken(user);
         
-        return new OkObjectResult(new {message = "Login successful", nome= user.FirstName});
+        return new OkObjectResult(new {message = "Login successful", nome= user.FirstName, token = Token});
         
     }
     public async Task<ActionResult<User>> UpdateUser(UserDto user, int id)
@@ -94,4 +97,7 @@ public class UserService : IUserService
 
         return await _userRepository.DeleteUser(id);
     }
+    
+  
+
 }
