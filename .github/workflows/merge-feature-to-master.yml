@@ -1,38 +1,20 @@
-name: Merge automático de features para Projetps
+name: Auto Merge PRs
 
 on:
   pull_request:
     branches:
       - Projetps
-    types:
-      - closed
 
 jobs:
-  auto-merge:
+  merge:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout do repositório
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Auto merge PR
+        uses: pascalgn/automerge-action@v0.15.0
         with:
-          fetch-depth: 0  # Garante que todas as branches são baixadas
-
-      - name: Verifica se o PR foi mesclado
-        if: github.event.pull_request.merged == false
-        run: |
-          echo "PR fechado sem merge, iniciando merge automático."
-
-      - name: Configurar usuário do Git
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
-
-      - name: Checkout da branch Projetps
-        run: |
-          git checkout Projetps
-          git pull origin Projetps  # Garante que está atualizado
-
-      - name: Merge da feature para Projetps
-        run: |
-          git merge --no-ff origin/${{ github.event.pull_request.head.ref }} -m "Merge automático via GitHub Actions"
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Matheus-Bernardo/Exchange-or-Loans.git Projetps
+          merge_method: merge
+          github_token: ${{ secrets.GITHUB_TOKEN }}
