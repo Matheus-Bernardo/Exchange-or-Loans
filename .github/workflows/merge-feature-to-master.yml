@@ -5,16 +5,16 @@ on:
     branches:
       - Projetps
 
+permissions:
+  pull-requests: write
+  contents: write
+
 jobs:
-  merge:
+  auto-merge:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Auto merge PR
-        uses: pascalgn/automerge-action@v0.15.0
-        with:
-          merge_method: merge
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Enable auto-merge
+        run: gh pr merge --auto --merge "$PR_URL"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
