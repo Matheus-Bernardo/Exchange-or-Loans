@@ -2,6 +2,7 @@
 using ExchangeOrLoans.models;
 using ExchangeOrLoans.Repositories;
 using ExchangeOrLoans.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Query.Internal;
@@ -25,14 +26,16 @@ public class UserController : ControllerBase
     {
         return await _userService.CreateUser(user);
     }
-
+    
+    [Authorize]
     [HttpGet("{id}")]
     public async Task<ActionResult<User>> GetUserById(int id)
     {
         return  await _userService.GetUserById(id);
         
     }
-
+    
+    [Authorize]
     [HttpGet]
     public async Task<ActionResult<List<UserDto>>> GetUsers()
     {
@@ -45,12 +48,14 @@ public class UserController : ControllerBase
         return await _userService.Login(loginDto);
     }
 
+    [Authorize]
     [HttpDelete("{id}")]
     public async Task<bool> DeleteUser(int id)
     {
         return await _userService.DeleteUser(id);
     }
     
+    [Authorize]
     [HttpPatch("{id}")]
     public async Task<ActionResult<User>> UpdateUser( UserDto user, int id)
     {
