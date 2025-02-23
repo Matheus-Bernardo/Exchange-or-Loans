@@ -17,6 +17,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // adding repositories and services
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IUserEvaluationRepository, UserEvaluationRepository>();
+builder.Services.AddScoped<IUserEvaluationService, UserEvaluationService>();
 builder.Services.AddControllers();
 
 // configuration CORS

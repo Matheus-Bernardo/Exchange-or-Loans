@@ -10,6 +10,7 @@ namespace ExchangeOrLoans.data
         }
         // Tables of dataBase
         public DbSet<User> User { get; set; }
+        public DbSet<UserEvaluation> UserEvaluation { get; set; }
         
     }
 }
