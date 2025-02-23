@@ -3,8 +3,6 @@ using ExchangeOrLoans.DTOS;
 using ExchangeOrLoans.models;
 using ExchangeOrLoans.Repositories;
 using Microsoft.AspNetCore.Mvc;
-
-
 namespace ExchangeOrLoans.Services;
 
 public class UserService : IUserService
