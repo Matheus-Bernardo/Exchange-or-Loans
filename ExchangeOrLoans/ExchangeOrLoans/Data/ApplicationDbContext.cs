@@ -11,6 +11,8 @@ namespace ExchangeOrLoans.data
         // Tables of dataBase
         public DbSet<User> User { get; set; }
         public DbSet<UserEvaluation> UserEvaluation { get; set; }
+        public DbSet<StatusProduct> StatusProduct { get; set; }
+        public DbSet<Product> Product { get; set; }
         
     }
 }
