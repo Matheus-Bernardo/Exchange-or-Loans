@@ -19,6 +19,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserEvaluationRepository, UserEvaluationRepository>();
 builder.Services.AddScoped<IUserEvaluationService, UserEvaluationService>();
+builder.Services.AddScoped<IStatusProductService, StatusProductService>();
+builder.Services.AddScoped<IStatusProductRepository, StatusProductRepository>();
 builder.Services.AddControllers();
 
 // configuration CORS
