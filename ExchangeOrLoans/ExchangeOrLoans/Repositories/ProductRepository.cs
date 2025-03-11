@@ -28,7 +28,7 @@ public class ProductRepository : IProductRepository
         return product;
     }
 
-    public async Task<Product?> GetProductByID(int id)
+    public async Task<Product?> GetProductById(int id)
     {
         var product = await _dbContext.Product.Where(product => product.IdProduct == id).FirstOrDefaultAsync();
         if(product == null) return null;
@@ -39,4 +39,6 @@ public class ProductRepository : IProductRepository
     {
         return await _dbContext.Product.ToListAsync();
     }
+
+   
 }
