@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
+using ExchangeOrLoans.Utils;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,8 +21,11 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserEvaluationRepository, UserEvaluationRepository>();
 builder.Services.AddScoped<IUserEvaluationService, UserEvaluationService>();
-builder.Services.AddScoped<IStatusProductService, StatusProductService>();
 builder.Services.AddScoped<IStatusProductRepository, StatusProductRepository>();
+builder.Services.AddScoped<IStatusProductService, StatusProductService>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IImageService, ImageService>();
 builder.Services.AddControllers();
 
 // configuration CORS
@@ -82,6 +87,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "ExchangeOrLoans API v1"));
 }
+
+
+//Ensures that created images can be accessed by url
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "ImagesProduct")),
+    RequestPath = "/ImagesProduct"
+});
+
 
 // Middleware
 app.UseCors("Allow everything");
