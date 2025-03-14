@@ -10,6 +10,11 @@ pipeline {
     //}
 
     stages {
+        stage('Debug PATH') {
+            steps {
+                bat 'set'
+            }
+        }
         stage('Checkout') {
             steps {
                 checkout([
