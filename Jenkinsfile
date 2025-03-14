@@ -5,9 +5,9 @@ pipeline {
         GITHUB_CREDENTIALS = credentials('github-credentials')
     }
 
-    triggers {
-        pollSCM('H/2 * * * *') 
-    }
+    //triggers {
+      //  pollSCM('H/2 * * * *') 
+    //}
 
     stages {
         stage('Checkout') {
