@@ -25,7 +25,7 @@ pipeline {
         stage('Clean Workspace') {
             steps {
                 bat '''
-                cd ExchangeOrLoans/ExchangeOrLoans/ExchangeOrLoans.Tests
+                cd ExchangeOrLoans.Tests
                 if exist bin rmdir /s /q bin
                 if exist obj rmdir /s /q obj
                 cd ..
@@ -36,17 +36,34 @@ pipeline {
         }
         stage('Restore Dependencies') {
             steps {
-                bat 'cd ExchangeOrLoans/ExchangeOrLoans && dotnet restore'
+                bat 'cd ExchangeOrLoans && dotnet restore'
             }
         }
         stage('Build') {
             steps {
-                bat 'cd ExchangeOrLoans/ExchangeOrLoans && dotnet build --configuration Release --no-restore'
+                bat 'cd ExchangeOrLoans && dotnet build --configuration Release --no-restore'
             }
         }
         stage('Run Tests in ExchangeOrLoans.Tests') {
             steps {
-                bat 'cd ExchangeOrLoans/ExchangeOrLoans/ExchangeOrLoans.Tests && dotnet test'
+                bat 'cd ExchangeOrLoans.Tests && dotnet test'
+            }
+        }
+        stage('Merge PR if Tests Pass') {
+            when {
+                expression { return env.CHANGE_ID != null } 
+            }
+            steps {
+                script {
+                    def GITHUB_TOKEN = credentials('github-credentials') 
+                    def PR_NUMBER = env.CHANGE_ID 
+
+                    bat """
+                    curl -X PUT -H "Authorization: token ${GITHUB_TOKEN}" \
+                    -d '{ "merge_method": "squash" }' \
+                    "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/${PR_NUMBER}/merge"
+                    """
+                }
             }
         }
     }
