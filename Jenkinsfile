@@ -24,17 +24,17 @@ pipeline {
         }
         stage('Restore Dependencies') {
             steps {
-                bat 'dotnet restore' 
+                bat 'cd ExchangeOrLoans/ExchangeOrLoans && dotnet restore' 
             }
         }
         stage('Build') {
             steps {
-                bat 'dotnet build --configuration Release --no-restore' 
+                bat 'cd ExchangeOrLoans/ExchangeOrLoans && dotnet build --configuration Release --no-restore'
             }
         }
         stage('Run Tests') {
             steps {
-                bat 'dotnet test --no-restore --verbosity normal' 
+                bat 'cd ExchangeOrLoans/ExchangeOrLoans && dotnet test --no-restore --verbosity normal'
             }
         }
     }
