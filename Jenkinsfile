@@ -41,7 +41,7 @@ pipeline {
         }
         stage('Build') {
             steps {
-                bat 'cd ExchangeOrLoans/ExchangeOrLoans && dotnet build --configuration Release --no-restore'
+                bat 'cd ExchangeOrLoans/ExchangeOrLoans && dotnet build'
             }
         }
         stage('Run Tests in ExchangeOrLoans.Tests') {
