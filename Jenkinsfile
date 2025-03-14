@@ -1,32 +1,31 @@
 pipeline {
     agent any
 
-    triggers {
-        githubPullRequest {
-            orgWhitelist(['Matheus-Bernardo'])
-            allowMembersOfWhitelistedOrgsAsAdmin()
-            permitAll()
-        }
+    environment {
+        GITHUB_CREDENTIALS = credentials('github-credentials-token') 
     }
 
-    environment {
-        GITHUB_CREDENTIALS = credentials('github-credentials') 
+    triggers {
+        pollSCM('H/2 * * * *') 
     }
 
     stages {
         stage('Checkout') {
             steps {
-                checkout scm
-            }
-        }
-        stage('Install Dependencies') {
-            steps {
-                sh 'dotnet restore' 
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/Projetps']],
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/Matheus-Bernardo/Exchange-or-Loans.git',
+                        credentialsId: 'github-credentials-token'
+                    ]]
+                ])
             }
         }
         stage('Run Tests') {
             steps {
-                sh 'dotnet test' 
+                sh 'dotnet restore'  
+                sh 'dotnet test'     
             }
         }
     }
