@@ -49,15 +49,26 @@ pipeline {
                 bat 'cd ExchangeOrLoans/ExchangeOrLoans/ExchangeOrLoans.Tests && dotnet test'
             }
         }
-        stage('Merge PR if Tests Pass') {
-            when {
-                expression { return env.CHANGE_ID != null } 
-            }
-            steps {
+    stage('Merge PR if Tests Pass') {
+             steps {
                 script {
-                    def PR_NUMBER = env.CHANGE_ID
+                    // Obtém a PR ativa no repositório usando a branch atual
+                    def PR_NUMBER = bat(
+                        script: """
+                        curl -s -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+                        -H "Accept: application/vnd.github.v3+json" \
+                        "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls?state=open" | jq -r '.[] | select(.head.ref == "${env.GIT_BRANCH}") | .number'
+                        """,
+                        returnStdout: true
+                    ).trim()
+        
+                    if (!PR_NUMBER?.isInteger()) {
+                        echo "No valid PR found for branch: ${env.GIT_BRANCH}. Skipping merge."
+                        return
+                    }
+        
                     echo "Attempting to merge PR #${PR_NUMBER}"
-                    
+        
                     def mergeStatus = bat(
                         script: """
                         curl -s -H "Authorization: Bearer ${GITHUB_TOKEN}" \
@@ -66,8 +77,8 @@ pipeline {
                         """,
                         returnStdout: true
                     ).trim()
-
-                     if (mergeStatus == "true") {
+        
+                    if (mergeStatus == "true") {
                         echo "PR is mergeable. Proceeding..."
                         bat """
                         curl -X PUT -H "Authorization: Bearer ${GITHUB_TOKEN}" \
@@ -82,5 +93,6 @@ pipeline {
                 }
             }
         }
+
     }
 }
