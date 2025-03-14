@@ -1,4 +1,6 @@
-﻿using ExchangeOrLoans.models;
+﻿using ExchangeOrLoans.Dtos;
+using ExchangeOrLoans.DTOS;
+using ExchangeOrLoans.models;
 using ExchangeOrLoans.Repositories;
 using ExchangeOrLoans.Utils;
 using Microsoft.AspNetCore.Mvc;
@@ -19,25 +21,42 @@ public class ProductService : IProductService
         _productRepository = productRepository;
     }
     
-    
-    public async Task<ActionResult<Product>> CreateProduct(Product product , IFormFile image)
+    public async Task<ActionResult<Product>> CreateProduct(ProductCreateDto productDto)
     {
-        if (product == null) 
+        if (productDto == null) 
             return new BadRequestObjectResult("Product cannot be null");
         
-        if(await _userRepository.GetUserById(product.IdUserSeller) == null) 
+        if(await _userRepository.GetUserById(productDto.IdUserSeller) == null) 
             return new BadRequestObjectResult("User does not exist");
         
-        if(product.Price == null) 
+        if(productDto.Price == null) 
             return new BadRequestObjectResult("Price cannot be null");
         
-        if(product.QuantityStock == null) 
+        if(productDto.QuantityStock == null) 
             return new BadRequestObjectResult("Quantity stock cannot be null");
-
-        if (image != null)
+        
+        var product = new Product
         {
-            var imageUrl = await _imageService.SaveImage(image);
-            product.ImageUrl = imageUrl;
+            Name = productDto.Name,
+            Description = productDto.Description,
+            IdUserSeller = productDto.IdUserSeller,
+            IdUserBuyer = productDto.IdUserBuyer,
+            Price = productDto.Price,
+            IdStatusProduct = productDto.IdStatusProduct,
+            QuantityStock = productDto.QuantityStock,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        if (productDto.Image != null)
+        {
+            try
+            {
+                product.ImageUrl = await _imageService.SaveImage(productDto.Image);
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult($"Image upload failed: {ex.Message}");
+            }
         }
         
         await _productRepository.CreateProduct(product);
@@ -53,25 +72,29 @@ public class ProductService : IProductService
         return new OkObjectResult(products);
     }
 
-    public async Task<ActionResult<Product>> UpdateProduct(Product product,IFormFile? image, int id)
+    public async Task<ActionResult<Product>> UpdateProduct(ProductCreateDto productDto, int id)
     {
         var productFind = await _productRepository.GetProductById(id);
         if(productFind == null) return new NotFoundObjectResult("Product not found");
+        
+        productFind.Name = productDto.Name ?? productFind.Name;
+        productFind.Price = productDto.Price;
+        productFind.QuantityStock = productDto.QuantityStock;
+        productFind.Description = productDto.Description ?? productFind.Description;
+        productFind.UpdateAt = DateTime.UtcNow;
 
-        if (image != null)
+        if (productDto.Image != null)
         {
-            var imageUrl = await _imageService.SaveImage(image);
-            productFind.ImageUrl = imageUrl;
+            try
+            {
+                productFind.ImageUrl = await _imageService.SaveImage(productDto.Image);
+            }
+            catch (Exception ex)
+            {
+                return new BadRequestObjectResult($"Image upload failed: {ex.Message}");
+            }
         }
         
-        productFind.Name = product.Name?? productFind.Name;
-        productFind.Price = product.Price ?? productFind.Price;
-        productFind.QuantityStock = product.QuantityStock ?? productFind.QuantityStock;
-        productFind.ImageUrl = product.ImageUrl ?? productFind.ImageUrl;
-        productFind.Description = product.Description ?? productFind.Description;
-        productFind.UpdateAt = DateTime.UtcNow;
-        productFind.IdStatusProduct =product.IdStatusProduct ?? productFind.IdStatusProduct;
-
         try
         {
             await _productRepository.UpdateProduct(productFind);
@@ -80,7 +103,6 @@ public class ProductService : IProductService
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
             return new NotFoundObjectResult("Product not updated");
         }
         

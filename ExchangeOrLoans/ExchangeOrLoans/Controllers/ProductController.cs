@@ -1,4 +1,6 @@
-﻿using ExchangeOrLoans.models;
+﻿using ExchangeOrLoans.Dtos;
+using ExchangeOrLoans.DTOS;
+using ExchangeOrLoans.models;
 using ExchangeOrLoans.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -19,13 +21,14 @@ public class ProductController: ControllerBase
 
     [Authorize]
     [HttpPost]
+    [Consumes("multipart/form-data")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<Product>> CreateProduct([FromForm] Product product,[FromForm] IFormFile image)
+    public async Task<ActionResult<Product>> CreateProduct([FromForm] ProductCreateDto productDto)
     {
-        return await _productService.CreateProduct(product,image);
+        return await _productService.CreateProduct(productDto);
     }
 
     [Authorize]
@@ -44,9 +47,10 @@ public class ProductController: ControllerBase
 
     [Authorize]
     [HttpPut("{id}")]
-    public async Task<ActionResult<Product>> UpdateProduct([FromForm] Product product,[FromForm] IFormFile? image,[FromRoute] int id)
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<Product>> UpdateProduct([FromForm] ProductCreateDto productDto, [FromRoute] int id)
     {
-        var updatedProduct = await _productService.UpdateProduct(product,image,id);
+        var updatedProduct = await _productService.UpdateProduct(productDto,id);
         if (updatedProduct == null) return  NotFound("product not found");
         
         return updatedProduct;
