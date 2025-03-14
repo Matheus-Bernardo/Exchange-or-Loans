@@ -50,49 +50,53 @@ pipeline {
             }
         }
     stage('Merge PR if Tests Pass') {
-             steps {
-                script {
-                    // Obtém a PR ativa no repositório usando a branch atual
-                    def PR_NUMBER = bat(
-                        script: """
-                        curl -s -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-                        -H "Accept: application/vnd.github.v3+json" \
-                        "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls?state=open" | jq -r '.[] | select(.head.ref == "${env.GIT_BRANCH}") | .number'
-                        """,
-                        returnStdout: true
-                    ).trim()
-        
-                    if (!PR_NUMBER?.isInteger()) {
-                        echo "No valid PR found for branch: ${env.GIT_BRANCH}. Skipping merge."
-                        return
-                    }
-        
-                    echo "Attempting to merge PR #${PR_NUMBER}"
-        
-                    def mergeStatus = bat(
-                        script: """
-                        curl -s -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-                        -H "Accept: application/vnd.github.v3+json" \
-                        "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/${PR_NUMBER}" | jq -r '.mergeable'
-                        """,
-                        returnStdout: true
-                    ).trim()
-        
-                    if (mergeStatus == "true") {
-                        echo "PR is mergeable. Proceeding..."
-                        bat """
-                        curl -X PUT -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-                        -H "Accept: application/vnd.github.v3+json" \
-                        -d '{ "merge_method": "squash" }' \
-                        "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/${PR_NUMBER}/merge"
-                        """
-                        echo "Merge completed successfully."
-                    } else {
-                        echo "PR is not mergeable. Skipping merge."
-                    }
+      steps {
+        script {
+            withCredentials([string(credentialsId: 'github-credentials', variable: 'GITHUB_TOKEN')]) {
+                
+                // Obtém a PR ativa no repositório usando a branch atual
+                def PR_NUMBER = bat(
+                    script: """
+                    curl -s -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+                    -H "Accept: application/vnd.github.v3+json" \
+                    "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls?state=open" | jq -r '.[] | select(.head.ref == "${env.GIT_BRANCH}") | .number'
+                    """,
+                    returnStdout: true
+                ).trim()
+
+                if (!PR_NUMBER?.isInteger()) {
+                    echo "No valid PR found for branch: ${env.GIT_BRANCH}. Skipping merge."
+                    return
+                }
+
+                echo "Attempting to merge PR #${PR_NUMBER}"
+
+                def mergeStatus = bat(
+                    script: """
+                    curl -s -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+                    -H "Accept: application/vnd.github.v3+json" \
+                    "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/${PR_NUMBER}" | jq -r '.mergeable'
+                    """,
+                    returnStdout: true
+                ).trim()
+
+                if (mergeStatus == "true") {
+                    echo "PR is mergeable. Proceeding..."
+                    bat """
+                    curl -X PUT -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+                    -H "Accept: application/vnd.github.v3+json" \
+                    -d '{ "merge_method": "squash" }' \
+                    "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/${PR_NUMBER}/merge"
+                    """
+                    echo "Merge completed successfully."
+                } else {
+                    echo "PR is not mergeable. Skipping merge."
                 }
             }
         }
+    }
+}
+
 
     }
 }
