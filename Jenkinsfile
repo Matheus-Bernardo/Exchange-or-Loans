@@ -46,7 +46,7 @@ pipeline {
         }
         stage('Run Tests in ExchangeOrLoans.Tests') {
             steps {
-                bat 'cd ExchangeOrLoans/ExchangeOrLoans/ExchangeOrLoans.Tests && dotnet test --no-restore --verbosity normal'
+                bat 'cd ExchangeOrLoans/ExchangeOrLoans/ExchangeOrLoans.Tests && dotnet test'
             }
         }
     }
