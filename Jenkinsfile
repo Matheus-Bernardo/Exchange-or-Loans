@@ -17,7 +17,7 @@ pipeline {
                     branches: [[name: '*/Projetps']],
                     userRemoteConfigs: [[
                         url: 'https://github.com/Matheus-Bernardo/Exchange-or-Loans.git',
-                        credentialsId: 'github-credentials'
+                        credentialsId: 'acess_token'
                     ]]
                 ])
             }
