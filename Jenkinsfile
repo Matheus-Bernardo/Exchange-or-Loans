@@ -55,14 +55,30 @@ pipeline {
             }
             steps {
                 script {
-                    def GITHUB_TOKEN = credentials('github-credentials') 
-                    def PR_NUMBER = env.CHANGE_ID 
+                    def PR_NUMBER = env.CHANGE_ID
+                    echo "Attempting to merge PR #${PR_NUMBER}"
+                    
+                    def mergeStatus = bat(
+                        script: """
+                        curl -s -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+                        -H "Accept: application/vnd.github.v3+json" \
+                        "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/${PR_NUMBER}" | jq -r '.mergeable'
+                        """,
+                        returnStdout: true
+                    ).trim()
 
-                    bat """
-                    curl -X PUT -H "Authorization: token ${GITHUB_TOKEN}" \
-                    -d '{ "merge_method": "squash" }' \
-                    "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/${PR_NUMBER}/merge"
-                    """
+                     if (mergeStatus == "true") {
+                        echo "PR is mergeable. Proceeding..."
+                        bat """
+                        curl -X PUT -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+                        -H "Accept: application/vnd.github.v3+json" \
+                        -d '{ "merge_method": "squash" }' \
+                        "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/${PR_NUMBER}/merge"
+                        """
+                        echo "Merge completed successfully."
+                    } else {
+                        echo "PR is not mergeable. Skipping merge."
+                    }
                 }
             }
         }
