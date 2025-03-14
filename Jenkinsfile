@@ -25,7 +25,7 @@ pipeline {
         stage('Clean Workspace') {
             steps {
                 bat '''
-                cd ExchangeOrLoans/ExchangeOrLoans.Tests
+                cd ExchangeOrLoans/ExchangeOrLoans/ExchangeOrLoans.Tests
                 if exist bin rmdir /s /q bin
                 if exist obj rmdir /s /q obj
                 cd ..
@@ -46,7 +46,7 @@ pipeline {
         }
         stage('Run Tests in ExchangeOrLoans.Tests') {
             steps {
-                bat 'cd ExchangeOrLoans/ExchangeOrLoans.Tests && dotnet test --no-restore --verbosity normal'
+                bat 'cd ExchangeOrLoans/ExchangeOrLoans/ExchangeOrLoans.Tests && dotnet test --no-restore --verbosity normal'
             }
         }
     }
