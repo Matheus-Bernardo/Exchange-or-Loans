@@ -50,11 +50,10 @@ pipeline {
             }
         }
     stage('Merge PR if Tests Pass') {
-      steps {
+    steps {
         script {
-            withCredentials([string(credentialsId: 'github-credentials', variable: 'GITHUB_TOKEN')]) {
+            withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
                 
-                // Obtém a PR ativa no repositório usando a branch atual
                 def PR_NUMBER = bat(
                     script: """
                     curl -s -H "Authorization: Bearer ${GITHUB_TOKEN}" \
@@ -96,6 +95,7 @@ pipeline {
         }
     }
 }
+
 
 
     }
