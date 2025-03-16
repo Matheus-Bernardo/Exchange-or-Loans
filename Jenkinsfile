@@ -78,7 +78,7 @@ pipeline {
                             setlocal enabledelayedexpansion
                             curl -s -H "Authorization: Bearer %GITHUB_TOKEN%" ^
                             -H "Accept: application/vnd.github.v3+json" ^
-                            "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls?state=open" | jq -r "select(.head.ref == \"Projetps\") | .number"
+                            "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls?state=open" | jq -r ".[] | select(.head.ref == \"Projetps\") | .number"
                             ''',
                             returnStdout: true
                         ).trim()
