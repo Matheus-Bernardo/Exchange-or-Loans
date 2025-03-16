@@ -80,18 +80,19 @@ pipeline {
                         "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls?state=open" > response.json
                         '''
 
-                        // Extraindo dinamicamente a branch e o número do PR
+                        // Extraindo dinamicamente a branch e o número do PR de forma segura
                         bat '''
-                        for /F "delims=" %i in ('jq -r ".[] | select(.head.ref != null) | .head.ref" response.json') do set BRANCH_NAME=%i
-                        '''
-                        def branchName = env.BRANCH_NAME
+                        set BRANCH_NAME=
+                        set PR_NUMBER=
 
-                        bat '''
-                        for /F "delims=" %i in ('jq -r ".[] | select(.head.ref != null) | .number" response.json') do set PR_NUMBER=%i
+                        for /F "delims=" %%i in ('jq -r ".[] | select(.head.ref != null) | .head.ref" response.json') do set BRANCH_NAME=%%i
+                        for /F "delims=" %%i in ('jq -r ".[] | select(.head.ref != null) | .number" response.json') do set PR_NUMBER=%%i
                         '''
-                        def PR_NUMBER = env.PR_NUMBER
 
-                        if (!PR_NUMBER) {
+                        def branchName = env.BRANCH_NAME?.trim()
+                        def PR_NUMBER = env.PR_NUMBER?.trim()
+
+                        if (!PR_NUMBER || PR_NUMBER == "") {
                             echo "Nenhum PR válido encontrado. Pulando merge."
                             return
                         }
@@ -108,6 +109,7 @@ pipeline {
                         -H "Accept: application/vnd.github.v3+json" ^
                         "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/%PR_NUMBER%" | jq -r ".mergeable" > mergeable_status.txt
                         '''
+
                         def mergeStatus = readFile('mergeable_status.txt').trim()
 
                         if (mergeStatus == "true") {
