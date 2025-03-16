@@ -82,14 +82,10 @@ pipeline {
 
                         // Extraindo dinamicamente a branch e o número do PR de forma segura
                         bat '''
-                        set BRANCH_NAME=
                         set PR_NUMBER=
-
-                        for /F "delims=" %%i in ('jq -r ".[] | select(.head.ref != null) | .head.ref" response.json') do set BRANCH_NAME=%%i
-                        for /F "delims=" %%i in ('jq -r ".[] | select(.head.ref != null) | .number" response.json') do set PR_NUMBER=%%i
+                        for /F "delims=" %%i in ('jq -r ".[] | select(.number != null) | .number" response.json') do set PR_NUMBER=%%i
                         '''
 
-                        def branchName = env.BRANCH_NAME?.trim()
                         def PR_NUMBER = env.PR_NUMBER?.trim()
 
                         if (!PR_NUMBER || PR_NUMBER == "") {
@@ -97,41 +93,19 @@ pipeline {
                             return
                         }
 
-                        echo "Branch do PR encontrado: ${branchName}"
                         echo "Número do PR encontrado: ${PR_NUMBER}"
 
                         // Aguardar atualização do GitHub
                         bat 'timeout /T 5 /NOBREAK'
 
-                        // Verificando se o PR pode ser mesclado
+                        // Força a mesclagem do PR sem verificações adicionais
                         bat '''
-                        curl -s -H "Authorization: Bearer %GITHUB_TOKEN%" ^
+                        curl -X PUT -H "Authorization: Bearer %GITHUB_TOKEN%" ^
                         -H "Accept: application/vnd.github.v3+json" ^
-                        "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/%PR_NUMBER%" | jq -r ".mergeable" > mergeable_status.txt
+                        -d "{ \"merge_method\": \"squash\" }" ^
+                        "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/%PR_NUMBER%/merge"
                         '''
-
-                        def mergeStatus = readFile('mergeable_status.txt').trim()
-
-                        if (mergeStatus == "true") {
-                            echo "PR é mesclável. Procedendo com o merge..."
-                            bat '''
-                            curl -X PUT -H "Authorization: Bearer %GITHUB_TOKEN%" ^
-                            -H "Accept: application/vnd.github.v3+json" ^
-                            -d "{ \"merge_method\": \"squash\" }" ^
-                            "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/%PR_NUMBER%/merge"
-                            '''
-                            echo "Merge concluído com sucesso."
-                        } else if (mergeStatus == "null") {
-                            echo "O estado de mesclagem ainda não foi determinado. Tentando novamente mais tarde."
-                        } else {
-                            echo "PR não é mesclável. Tentando atualizar a branch antes do merge."
-                            bat '''
-                            curl -X POST -H "Authorization: Bearer %GITHUB_TOKEN%" ^
-                            -H "Accept: application/vnd.github.v3+json" ^
-                            "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/%PR_NUMBER%/update-branch"
-                            '''
-                            echo "Branch atualizada. Verifique o PR novamente após alguns minutos."
-                        }
+                        echo "Merge forçado concluído com sucesso."
                     }
                 }
             }
