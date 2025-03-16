@@ -5,10 +5,6 @@ pipeline {
         GITHUB_CREDENTIALS = credentials('github-credentials')
     }
 
-    //triggers {
-      //  pollSCM('H/2 * * * *') 
-    //}
-
     stages {
         stage('Debug PATH') {
             steps {
@@ -76,19 +72,19 @@ pipeline {
                 script {
                     withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
                         
-                        // Obtém o número do PR correspondente ao branch atual
                         def PR_NUMBER = bat(
                             script: '''
                             @echo off
                             setlocal enabledelayedexpansion
                             curl -s -H "Authorization: Bearer %GITHUB_TOKEN%" ^
                             -H "Accept: application/vnd.github.v3+json" ^
-                            "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls?state=open" | jq -r ".[] | select(.head.ref == 'Projetps') | .number"
+                            "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls?state=open" | jq -r "select(.head.ref == \"Projetps\") | .number"
                             ''',
                             returnStdout: true
                         ).trim()
 
-                        if (!PR_NUMBER?.isInteger()) {
+                        PR_NUMBER = PR_NUMBER.replaceAll("\\s", "")
+                        if (!PR_NUMBER.isNumber()) {
                             echo "Nenhum PR válido encontrado para a branch Projetps. Pulando merge."
                             return
                         }
@@ -100,7 +96,7 @@ pipeline {
                             @echo off
                             curl -s -H "Authorization: Bearer %GITHUB_TOKEN%" ^
                             -H "Accept: application/vnd.github.v3+json" ^
-                            "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/%PR_NUMBER%" | jq -r ".mergeable"
+                            "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/%PR_NUMBER%" | jq -r "if .mergeable == null then \"unknown\" else .mergeable end"
                             ''',
                             returnStdout: true
                         ).trim()
@@ -111,10 +107,12 @@ pipeline {
                             @echo off
                             curl -X PUT -H "Authorization: Bearer %GITHUB_TOKEN%" ^
                             -H "Accept: application/vnd.github.v3+json" ^
-                            -d "{ \\"merge_method\\": \\"squash\\" }" ^
+                            -d "{ \"merge_method\": \"squash\" }" ^
                             "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/%PR_NUMBER%/merge"
                             '''
                             echo "Merge concluído com sucesso."
+                        } else if (mergeStatus == "unknown") {
+                            echo "O estado de mesclagem ainda não foi determinado. Tentando novamente mais tarde."
                         } else {
                             echo "PR não é mesclável. Pulando merge."
                         }
