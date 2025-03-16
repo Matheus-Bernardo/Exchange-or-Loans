@@ -73,29 +73,26 @@ pipeline {
                 script {
                     withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
                         
-                        // Obtendo PRs abertos
-                        def response = bat(
-                            script: '''
-                            curl -s -H "Authorization: Bearer %GITHUB_TOKEN%" ^
-                            -H "Accept: application/vnd.github.v3+json" ^
-                            "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls?state=open"
-                            ''',
-                            returnStdout: true
-                        ).trim()
+                        // Obtendo PRs abertos e salvando em um arquivo temporário
+                        bat '''
+                        curl -s -H "Authorization: Bearer %GITHUB_TOKEN%" ^
+                        -H "Accept: application/vnd.github.v3+json" ^
+                        "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls?state=open" > response.json
+                        '''
 
-                        echo "Resposta da API do GitHub para PRs Abertos: ${response}"
-
-                        // Extraindo dinamicamente a branch e o número do PR
+                        // Extraindo dinamicamente o número do PR
                         def PR_NUMBER = bat(
                             script: '''
-                            echo %response% | jq -r 'map(select(.head.ref != null)) | .[0].number'
+                            for /f "delims=" %%i in ('jq -r ".[] | select(.head.ref != null) | .number" response.json') do set PR_NUMBER=%%i
+                            echo %PR_NUMBER%
                             ''',
                             returnStdout: true
                         ).trim()
 
                         def branchName = bat(
                             script: '''
-                            echo %response% | jq -r 'map(select(.head.ref != null)) | .[0].head.ref'
+                            for /f "delims=" %%i in ('jq -r ".[] | select(.head.ref != null) | .head.ref" response.json') do set BRANCH_NAME=%%i
+                            echo %BRANCH_NAME%
                             ''',
                             returnStdout: true
                         ).trim()
@@ -123,7 +120,7 @@ pipeline {
                             bat '''
                             curl -X PUT -H "Authorization: Bearer %GITHUB_TOKEN%" ^
                             -H "Accept: application/vnd.github.v3+json" ^
-                            -d "{ \"merge_method\": \"squash\" }" ^
+                            -d "{ \\"merge_method\\": \\"squash\\" }" ^
                             "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/%PR_NUMBER%/merge"
                             '''
                             echo "Merge concluído com sucesso."
