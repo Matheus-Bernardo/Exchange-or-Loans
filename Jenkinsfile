@@ -16,7 +16,7 @@ pipeline {
             steps {
                 checkout([
                     $class: 'GitSCM',
-                    branches: [[name: '*/Projetps']],
+                    branches: [[name: '*/main']],
                     userRemoteConfigs: [[
                         url: 'https://github.com/Matheus-Bernardo/Exchange-or-Loans.git',
                         credentialsId: 'github-credentials'
@@ -68,11 +68,11 @@ pipeline {
             }
         }
 
-                stage('Merge PR if Tests Pass') {
+        stage('Merge PR if Tests Pass') {
             steps {
                 script {
                     withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
-
+                        
                         // Obtendo PRs abertos
                         def response = bat(
                             script: '''
@@ -88,16 +88,16 @@ pipeline {
 
                         // Extraindo dinamicamente a branch e o número do PR
                         def PR_NUMBER = bat(
-                            script: """
-                            echo ${response} | jq -r '[.[] | {branch: .head.ref, number: .number}] | .[0].number'
-                            """,
+                            script: '''
+                            echo %response% | jq -r 'map(select(.head.ref != null)) | .[0].number'
+                            ''',
                             returnStdout: true
                         ).trim()
 
                         def branchName = bat(
-                            script: """
-                            echo ${response} | jq -r '[.[] | {branch: .head.ref, number: .number}] | .[0].branch'
-                            """,
+                            script: '''
+                            echo %response% | jq -r 'map(select(.head.ref != null)) | .[0].head.ref'
+                            ''',
                             returnStdout: true
                         ).trim()
 
@@ -111,22 +111,22 @@ pipeline {
 
                         // Verificando se o PR pode ser mesclado
                         def mergeStatus = bat(
-                            script: """
+                            script: '''
                             curl -s -H "Authorization: Bearer %GITHUB_TOKEN%" ^
                             -H "Accept: application/vnd.github.v3+json" ^
-                            "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/${PR_NUMBER}" | jq -r ".mergeable"
-                            """,
+                            "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/%PR_NUMBER%" | jq -r ".mergeable"
+                            ''',
                             returnStdout: true
                         ).trim()
 
                         if (mergeStatus == "true") {
                             echo "PR é mesclável. Procedendo com o merge..."
-                            bat """
+                            bat '''
                             curl -X PUT -H "Authorization: Bearer %GITHUB_TOKEN%" ^
                             -H "Accept: application/vnd.github.v3+json" ^
-                            -d "{ \\"merge_method\\": \\"squash\\" }" ^
-                            "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/${PR_NUMBER}/merge"
-                            """
+                            -d "{ \"merge_method\": \"squash\" }" ^
+                            "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/%PR_NUMBER%/merge"
+                            '''
                             echo "Merge concluído com sucesso."
                         } else if (mergeStatus == "null") {
                             echo "O estado de mesclagem ainda não foi determinado. Tentando novamente mais tarde."
@@ -137,6 +137,5 @@ pipeline {
                 }
             }
         }
-
     }
 }
