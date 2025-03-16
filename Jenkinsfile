@@ -11,6 +11,7 @@ pipeline {
                 bat 'set'
             }
         }
+
         stage('Checkout') {
             steps {
                 checkout([
@@ -72,6 +73,7 @@ pipeline {
                 script {
                     withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
 
+                        // Obtendo PRs abertos
                         def response = bat(
                             script: '''
                             @echo off
@@ -84,28 +86,45 @@ pipeline {
 
                         echo "Resposta da API do GitHub para PRs Abertos: ${response}"
 
-                        def PR_NUMBER = bat(
+                        // Extraindo dinamicamente a branch e o número do PR
+                        def PR_INFO = bat(
                             script: '''
                             @echo off
-                            echo %response% | jq -r ".[] | select(.head.ref == \"Projetps\") | .number"
+                            echo %response% | jq -r ".[] | {branch: .head.ref, number: .number}" | jq -c "select(.branch != null and .number != null)"
                             ''',
                             returnStdout: true
                         ).trim()
 
-                        PR_NUMBER = PR_NUMBER.replaceAll("\\s", "")
-                        if (!PR_NUMBER.isNumber()) {
-                            echo "Nenhum PR válido encontrado para a branch Projetps. Pulando merge."
+                        if (PR_INFO.isEmpty()) {
+                            echo "Nenhum PR válido encontrado. Pulando merge."
                             return
                         }
 
-                        echo "Tentando mesclar PR #${PR_NUMBER}"
+                        def branchName = bat(
+                            script: "echo ${PR_INFO} | jq -r '.branch'",
+                            returnStdout: true
+                        ).trim()
 
+                        def PR_NUMBER = bat(
+                            script: "echo ${PR_INFO} | jq -r '.number'",
+                            returnStdout: true
+                        ).trim()
+
+                        echo "Branch do PR encontrado: ${branchName}"
+                        echo "Número do PR encontrado: ${PR_NUMBER}"
+
+                        if (PR_NUMBER.isEmpty() || !PR_NUMBER.isNumber()) {
+                            echo "Nenhum PR válido encontrado para merge. Pulando etapa."
+                            return
+                        }
+
+                        // Verificando se o PR pode ser mesclado
                         def mergeStatus = bat(
                             script: '''
                             @echo off
                             curl -s -H "Authorization: Bearer %GITHUB_TOKEN%" ^
                             -H "Accept: application/vnd.github.v3+json" ^
-                            "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/%PR_NUMBER%" | jq -r "if .mergeable == null then \"unknown\" else .mergeable end"
+                            "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/%PR_NUMBER%" | jq -r "if .mergeable == null then \\"unknown\\" else .mergeable end"
                             ''',
                             returnStdout: true
                         ).trim()
@@ -116,7 +135,7 @@ pipeline {
                             @echo off
                             curl -X PUT -H "Authorization: Bearer %GITHUB_TOKEN%" ^
                             -H "Accept: application/vnd.github.v3+json" ^
-                            -d "{ \"merge_method\": \"squash\" }" ^
+                            -d "{ \\"merge_method\\": \\"squash\\" }" ^
                             "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/%PR_NUMBER%/merge"
                             '''
                             echo "Merge concluído com sucesso."
