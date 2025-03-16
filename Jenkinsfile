@@ -12,16 +12,36 @@ pipeline {
             }
         }
 
+        stage('Identify Default Branch') {
+            steps {
+                script {
+                    def branchResponse = bat(
+                        script: '''
+                        curl -s -H "Authorization: Bearer %GITHUB_CREDENTIALS%" ^
+                        -H "Accept: application/vnd.github.v3+json" ^
+                        "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans" | jq -r ".default_branch"
+                        ''',
+                        returnStdout: true
+                    ).trim()
+                    
+                    echo "Branch padrão identificada: ${branchResponse}"
+                    env.DEFAULT_BRANCH = branchResponse
+                }
+            }
+        }
+
         stage('Checkout') {
             steps {
-                checkout([
-                    $class: 'GitSCM',
-                    branches: [[name: '*/main']],
-                    userRemoteConfigs: [[
-                        url: 'https://github.com/Matheus-Bernardo/Exchange-or-Loans.git',
-                        credentialsId: 'github-credentials'
-                    ]]
-                ])
+                script {
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: "*/${env.DEFAULT_BRANCH}"]],
+                        userRemoteConfigs: [[
+                            url: 'https://github.com/Matheus-Bernardo/Exchange-or-Loans.git',
+                            credentialsId: 'github-credentials'
+                        ]]
+                    ])
+                }
             }
         }
 
@@ -76,7 +96,6 @@ pipeline {
                         // Obtendo PRs abertos
                         def response = bat(
                             script: '''
-                            @echo off
                             curl -s -H "Authorization: Bearer %GITHUB_TOKEN%" ^
                             -H "Accept: application/vnd.github.v3+json" ^
                             "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls?state=open"
@@ -89,19 +108,19 @@ pipeline {
                         // Extraindo dinamicamente a branch e o número do PR
                         def PR_NUMBER = bat(
                             script: '''
-                            echo %response% | jq -r 'map(select(.head.ref != null)) | .[0].number'
+                            echo ${response} | jq -r 'map(select(.head.ref != null)) | .[0].number'
                             ''',
                             returnStdout: true
                         ).trim()
 
                         def branchName = bat(
                             script: '''
-                            echo %response% | jq -r 'map(select(.head.ref != null)) | .[0].head.ref'
+                            echo ${response} | jq -r 'map(select(.head.ref != null)) | .[0].head.ref'
                             ''',
                             returnStdout: true
                         ).trim()
 
-                        if (PR_NUMBER.isEmpty() || !PR_NUMBER.isNumber()) {
+                        if (PR_NUMBER.isEmpty()) {
                             echo "Nenhum PR válido encontrado. Pulando merge."
                             return
                         }
@@ -114,7 +133,7 @@ pipeline {
                             script: '''
                             curl -s -H "Authorization: Bearer %GITHUB_TOKEN%" ^
                             -H "Accept: application/vnd.github.v3+json" ^
-                            "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/%PR_NUMBER%" | jq -r ".mergeable"
+                            "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/${PR_NUMBER}" | jq -r ".mergeable"
                             ''',
                             returnStdout: true
                         ).trim()
@@ -125,7 +144,7 @@ pipeline {
                             curl -X PUT -H "Authorization: Bearer %GITHUB_TOKEN%" ^
                             -H "Accept: application/vnd.github.v3+json" ^
                             -d "{ \"merge_method\": \"squash\" }" ^
-                            "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/%PR_NUMBER%/merge"
+                            "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls/${PR_NUMBER}/merge"
                             '''
                             echo "Merge concluído com sucesso."
                         } else if (mergeStatus == "null") {
