@@ -71,14 +71,23 @@ pipeline {
             steps {
                 script {
                     withCredentials([string(credentialsId: 'github-token', variable: 'GITHUB_TOKEN')]) {
-                        
+
+                        def response = bat(
+                            script: '''
+                            @echo off
+                            curl -s -H "Authorization: Bearer %GITHUB_TOKEN%" ^
+                            -H "Accept: application/vnd.github.v3+json" ^
+                            "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls?state=open"
+                            ''',
+                            returnStdout: true
+                        ).trim()
+
+                        echo "Resposta da API do GitHub para PRs Abertos: ${response}"
+
                         def PR_NUMBER = bat(
                             script: '''
                             @echo off
-                            setlocal enabledelayedexpansion
-                            curl -s -H "Authorization: Bearer %GITHUB_TOKEN%" ^
-                            -H "Accept: application/vnd.github.v3+json" ^
-                            "https://api.github.com/repos/Matheus-Bernardo/Exchange-or-Loans/pulls?state=open" | jq -r ".[] | select(.head.ref == \"Projetps\") | .number"
+                            echo %response% | jq -r ".[] | select(.head.ref == \"Projetps\") | .number"
                             ''',
                             returnStdout: true
                         ).trim()
