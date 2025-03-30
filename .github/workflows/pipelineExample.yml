@@ -16,7 +16,10 @@ jobs:
     steps:
       - name: Clonar repositório na VM 
         uses: actions/checkout@v4
-      
+
+      - name: Verificar estrutura de arquivos
+        run: ls -la  
+        
       - name: Preparar o ambiente .NET
         uses: actions/setup-dotnet@v4
         with:
