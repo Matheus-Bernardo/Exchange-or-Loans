@@ -32,7 +32,9 @@ jobs:
           dotnet-version: 9.0.x
           
       - name: Restaurar depedências do projeto
-        run: dotnet restore
+        run: |
+         ls
+         dotnet restore
         
       - name: Build
         run: dotnet build --no-restore
