@@ -33,7 +33,7 @@ jobs:
           
       - name: Restaurar depedências do projeto
         run: |
-         ls
+         cd ..
          dotnet restore
         
       - name: Build
