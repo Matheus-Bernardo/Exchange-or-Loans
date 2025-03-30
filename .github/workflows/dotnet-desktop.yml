@@ -1,0 +1,74 @@
+name: Pipeline Completo
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "Projetps" ]
+  pull_request:
+    branches: [ "Projetps" ]
+
+jobs:
+  # Job para execução dos testes
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clonar repositório na VM
+        uses: actions/checkout@v4
+
+      - name: Preparar o ambiente .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restaurar dependências do projeto
+        run: dotnet restore ExchangeOrLoans/ExchangeOrLoans.sln
+
+      - name: Executar testes
+        run: dotnet test --logger "trx;LogFileName=test-results.trx"
+        working-directory: ExchangeOrLoans/ExchangeOrLoans/ExchangeOrLoans.Tests
+
+      - name: Salvar relatório de testes como artefato
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: ExchangeOrLoans/ExchangeOrLoans/ExchangeOrLoans.Tests/TestResults/*.trx
+
+  # Job para build e empacotamento
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Clonar repositório na VM
+        uses: actions/checkout@v4
+
+      - name: Preparar o ambiente .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restaurar dependências do projeto
+        run: dotnet restore ExchangeOrLoans/ExchangeOrLoans.sln
+
+      - name: Build e empacotamento
+        run: dotnet publish ExchangeOrLoans/ExchangeOrLoans.sln --configuration Release --output ./output
+
+      - name: Salvar pacote como artefato
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-package
+          path: ./output
+
+  # Job para notificação por e-mail
+  notify:
+    runs-on: ubuntu-latest
+    needs: [test, build]
+    steps:
+      - name: Instalar dependências necessárias
+        run: sudo apt-get install -y mailutils
+
+      - name: Enviar e-mail de notificação
+        env:
+          EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
+        run: |
+          echo "Pipeline executado com sucesso!" | mail -s "Notificação do Pipeline" $EMAIL_RECIPIENT
+          echo "Relatório de testes e pacote de build estão disponíveis como artefatos."
