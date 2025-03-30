@@ -39,4 +39,5 @@ jobs:
         run: dotnet build ExchangeOrLoans/ExchangeOrLoans.sln --no-restore
         
       - name: Test
-        run: dotnet test ExchangeOrLoans/ExchangeOrLoans.sln/ExchangeOrLoans.Tests 
+        run: dotnet test
+        working-directory: ExchangeOrLoans/ExchangeOrLoans/ExchangeOrLoans.Tests
