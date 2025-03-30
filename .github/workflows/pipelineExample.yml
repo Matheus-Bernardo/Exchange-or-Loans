@@ -19,6 +19,11 @@ jobs:
 
       - name: Verificar estrutura de arquivos
         run: ls -la  
+
+      - name: Navegar até as pastas corretas
+        run: |
+         cd  ExchangeOrLoans
+         ls -la
         
       - name: Preparar o ambiente .NET
         uses: actions/setup-dotnet@v4
