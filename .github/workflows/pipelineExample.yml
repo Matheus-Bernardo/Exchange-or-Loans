@@ -17,14 +17,15 @@ jobs:
       - name: Clonar repositório na VM 
         uses: actions/checkout@v4
 
-      - name: Verificar estrutura de arquivos
-        run: ls -la  
-
-      - name: Navegar até as pastas corretas
+      - name: Verificar estrutura de diretórios
         run: |
-         cd  ExchangeOrLoans
-         cd ExchangeOrLoans
-         ls -la
+          echo "Diretório atual:"
+          pwd
+          echo "Conteúdo:"
+          ls -la
+          echo "Buscando arquivos .sln e .csproj:"
+          find . -name "*.sln"
+          find . -name "*.csproj"
         
       - name: Preparar o ambiente .NET
         uses: actions/setup-dotnet@v4
