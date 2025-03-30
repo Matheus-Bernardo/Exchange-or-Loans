@@ -22,7 +22,7 @@ jobs:
 
       - name: Navegar até as pastas corretas
         run: |
-         cd  ExchangeOrLoans
+         cd  ExchangeOrLoans/ExchangeOrLoans
          ls -la
         
       - name: Preparar o ambiente .NET
