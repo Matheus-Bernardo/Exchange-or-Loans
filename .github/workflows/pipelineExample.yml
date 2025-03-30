@@ -71,3 +71,4 @@ jobs:
           EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
         run: |
           echo "Pipeline executado com sucesso!" | mail -s "Notificação do Pipeline" $EMAIL_RECIPIENT
+          
