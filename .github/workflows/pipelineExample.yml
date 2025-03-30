@@ -59,15 +59,29 @@ jobs:
           path: ./output
 
   # Job para notificação por e-mail
+    # Job para notificação por e-mail
   notify:
     runs-on: ubuntu-latest
     needs: test
     steps:
-      - name: Instalar dependências necessárias
-        run: sudo apt-get install -y mailutils
-
       - name: Enviar e-mail de notificação
-        env:
-          EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
-        run: |
-          echo "Pipeline executado com sucesso!" | mail -s "Notificação do Pipeline" $EMAIL_RECIPIENT
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.GMAIL_APP_PASSWORD }}
+          subject: "✅ Pipeline ExchangeOrLoans executado com sucesso"
+          body: |
+            Olá,
+
+            O pipeline de testes do projeto ExchangeOrLoans foi executado com sucesso no GitHub Actions.
+
+            ✔️ Branch: ${{ github.ref }}
+            ✔️ Commit: ${{ github.sha }}
+            ✔️ Autor: ${{ github.actor }}
+            ✔️ Status: Todos os testes executados (job: test)
+
+            Abraços!
+          to: ${{ secrets.EMAIL_RECIPIENT }}
+          from: "GitHub Actions ExchangeOrLoans <${{ secrets.EMAIL_USERNAME }}}>"
