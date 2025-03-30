@@ -28,7 +28,7 @@ jobs:
         working-directory: ExchangeOrLoans/ExchangeOrLoans/ExchangeOrLoans.Tests
 
       - name: Salvar relatório de testes como artefato
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: test-results
           path: ExchangeOrLoans/ExchangeOrLoans/ExchangeOrLoans.Tests/TestResults/*.trx
@@ -61,7 +61,7 @@ jobs:
   # Job para notificação por e-mail
   notify:
     runs-on: ubuntu-latest
-    needs: [test, build]
+    needs: test
     steps:
       - name: Instalar dependências necessárias
         run: sudo apt-get install -y mailutils
@@ -71,4 +71,3 @@ jobs:
           EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
         run: |
           echo "Pipeline executado com sucesso!" | mail -s "Notificação do Pipeline" $EMAIL_RECIPIENT
-          
